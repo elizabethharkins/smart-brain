@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import Particles from 'react-particles-js';
 import Navigation from './components/navigation/Navigation';
 import Logo from './components/logo/Logo';
@@ -18,20 +18,36 @@ const particlesOptions = {
   }
 }
 
-function App() {
-  return (
-    <div className="App">
-      <Particles
-        className='particles'
-        params={ particlesOptions }
-      />
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageLinkForm />
-          {/*}  <FaceRecognition />*/}
-    </div>
-  );
+class App extends Component {
+  // need to create state here to align app + user
+  constructor() {
+    super();
+    this.state = {
+      input: '',
+    }
+  }
+
+  // event listener on page, receive 'event'
+  onInputChange = (event) => {
+    console.log(event.target.value);
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Particles
+          className='particles'
+          params={ particlesOptions }
+        />
+        <Navigation />
+        <Logo />
+        <Rank />
+
+        <ImageLinkForm onInputChange={ this.onInputChange } /> 
+            {/*}  <FaceRecognition />*/}
+      </div>
+    );
+  }
 }
 
 export default App;
