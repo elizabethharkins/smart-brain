@@ -80,7 +80,7 @@ const particlesOptions = {
 const initialState = {
   input: '',
   imageUrl: '',
-  box: {},
+  box: [],
   route: 'signin',
   isSignedIn: false,
   user: {
@@ -107,29 +107,44 @@ class App extends Component {
       entries: data.entries,
       joined: data.joined
     }})
-  }
+  };
 
   calculateFaceLocation = (data) => {
     // from the nested console data info
     // depending on the regions, an array is possible - multiple faces
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById('inputimage');
-    const width = Number(image.width);
-    const height = Number(image.height);
+    // const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    // const image = document.getElementById('inputimage');
+    // const width = Number(image.width);
+    // const height = Number(image.height);
     // return an object here - from the box state above
     // dimensions guided by position details on Clarifai's site -
     // proportions of row, col 
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow: height - (clarifaiFace.bottom_row * height)
-    }
-  }
+    // return {
+    //   leftCol: clarifaiFace.left_col * width,
+    //   topRow: clarifaiFace.top_row * height,
+    //   rightCol: width - (clarifaiFace.right_col * width),
+    //   bottomRow: height - (clarifaiFace.bottom_row * height)
+    // }
+    const clarifaiFace = data.outputs[0].data.regions;
+    const image = document.getElementById('inputImage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    const faceCollection = [];
+    clarifaiFace.forEach((face) => {
+      const boundingBoxArr = [];
+      const faceCoord = face.region_info.bounding_box;
+      boundingBoxArr.push({leftCol: faceCoord.left_col * width});
+      boundingBoxArr.push({topRow: faceCoord.top_row * height});
+      boundingBoxArr.push({rightCol: width - (faceCoord.right_col * width)});
+      boundingBoxArr.push({bottomRow: height - (faceCoord.bottom_row * height)});
+      faceCollection.push(boundingBoxArr);
+    });
+    return faceCollection;
+  };
 
   displayFaceBox = (box) => {
     this.setState({box: box});   // w/ES6 {{box}}
-  }
+  };
 
   // event listener on page, receive 'event'
   onInputChange = (event) => {
@@ -159,7 +174,7 @@ class App extends Component {
             .then(count => {
              this.setState(Object.assign(this.state.user, { entries: count }))
             })
-            .catch(console.log);
+            .catch(err => console.log(err));
              
         }
         this.displayFaceBox(this.calculateFaceLocation(response))
